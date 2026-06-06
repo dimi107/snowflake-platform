@@ -1,31 +1,28 @@
 name: Deploy to Snowflake
 
-# Trigger: runs automatically when code is merged into main
+# Triggers only when code is merged into master via a PR.
+# IMPORTANT: direct pushes to master should be blocked via branch protection rules.
+# The correct flow is: feature branch → PR → review → merge → this runs.
 on:
   push:
     branches: [master]
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # GitHub spins up a fresh Linux machine
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: download your repo code onto that Linux machine
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: install Python on the Linux machine
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # Step 3: install the Snowflake connector library
       - name: Install dependencies
         run: pip install snowflake-connector-python
 
-      # Step 4: run the deploy script
-      # Secrets are stored in GitHub — never in your code
       - name: Run migrations
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}

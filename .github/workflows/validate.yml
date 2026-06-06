@@ -1,0 +1,36 @@
+name: Validate PR
+
+# Runs on every pull request targeting master.
+# Checks that migrations folder has SQL files and they are not empty.
+# Blocks the merge if validation fails.
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check migrations exist
+        run: |
+          count=$(ls migrations/*.sql 2>/dev/null | wc -l)
+          if [ "$count" -eq 0 ]; then
+            echo "ERROR: No SQL files found in migrations/"
+            exit 1
+          fi
+          echo "Found $count migration file(s):"
+          ls migrations/*.sql
+
+      - name: Check no migration is empty
+        run: |
+          for f in migrations/*.sql; do
+            if [ ! -s "$f" ]; then
+              echo "ERROR: $f is empty"
+              exit 1
+            fi
+          done
+          echo "All migration files have content."
