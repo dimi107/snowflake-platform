@@ -18,7 +18,7 @@ import snowflake.connector
 account  = os.environ.get("SNOWFLAKE_ACCOUNT") or os.environ["SNOWSQL_ACCOUNT"]
 user     = os.environ.get("SNOWFLAKE_USER")    or os.environ["SNOWSQL_USER"]
 password = os.environ.get("SNOWFLAKE_PASSWORD") or os.environ.get("SNOWSQL_PWD", "")
-env      = os.environ.get("SNOWFLAKE_ENV", "prod").lower()
+env      = os.environ.get("SNOWFLAKE_ENV", "dev").lower()
 
 # Map environment name → actual Snowflake object names
 DB_MAP = {"prod": "ENTERPRISE_DB", "dev": "DEV_DB"}
