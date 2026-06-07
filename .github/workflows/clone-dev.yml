@@ -1,14 +1,12 @@
-name: Deploy to Snowflake
+name: Refresh DEV environment
 
-# Triggers only when code is merged into master via a PR.
-# IMPORTANT: direct pushes to master should be blocked via branch protection rules.
-# The correct flow is: feature branch → PR → review → merge → this runs.
+# Manual trigger only — run this at the start of a sprint or before
+# testing a destructive change. It drops DEV_DB and re-clones from PROD.
 on:
-  push:
-    branches: [master]
+  workflow_dispatch:
 
 jobs:
-  deploy:
+  clone:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,10 +21,17 @@ jobs:
       - name: Install dependencies
         run: pip install snowflake-connector-python
 
-      - name: Run migrations
+      - name: Clone PROD → DEV
         env:
           SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
           SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
           SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ENV: prod
+        run: python clone_dev.py
+
+      - name: Run migrations against DEV
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ENV: dev
         run: python deploy.py
